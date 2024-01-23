@@ -2,14 +2,8 @@
 
 # Manual Shopify Integration
 
-Code for pulling data from [Shopify](https://dev.shopify.com) by interacting directly with their API.
-
-Reads data from `Order`, `Product` and `Customer` endpoints for the accounts you register.
-
-> [!CAUTION]
-> This is a toy project. The patterns here will not scale in production. Look
-> for `TODO` and `FIXME` tags that explain the missing gaps in this solution.
-> They're substantial.
+Sample code for pulling `Orders`, `Products` and `Customer` rows from
+third-party [Shopify](https://dev.shopify.com) stores, by interacting directly with their API.
 
 ## Setup
 
@@ -39,94 +33,92 @@ Run poller and webhook listener to keep data fresh:
 
 `yarn run updater.ts --myShopifyDomain EXAMPLE.myshopify.com`
 
-<br />
-
-# What's missing? 👨🏻‍🚒
+## What's missing?
 
 In a real project, you will have to deal with the following questions before pushing this code to production.
 
-### Testing concerns
+### Testing
 
-- How do you unit test this code?
+- How do we unit test this code?
 
-To run tests that talk to the Shopify API, you will need Shopify stores for testing...
+To run tests that talk to the Shopify API, we will need dummy Shopify stores for testing...
 
-- How do you populate stores for reliable testing?
+- How do we reliably populate test stores?
 
-- How do keep test stores filled with data over time?
+- How do we keep test stores filled with data over time?
 
-- How do you obtain credentials for test shops? (hint: You may have to host the Shopify OAuth redirection locally using ngrok.)
+- How do we obtain credentials for test shops? (hint: You may have to host the Shopify OAuth redirection locally using ngrok.)
 
 - Will engineers share test stores?
 
-  - If yes, how do you avoid transient errors like 429s? What if those break CI?
+  - If yes, how do we avoid transient errors like 429s? What if those break CI?
 
-  - If no, how do you guide engineers to create new shops, Shopify apps, and then obtain credentials?
+  - If no, how do we guide engineers to create new shops, Shopify apps, and then obtain credentials?
 
-- How do you test resources only available to Shopify Plus customers? Or resources that can't be created via the API (eg. refunds)?
+- How do we test resources only available to Shopify Plus customers? Or resources that can't be created via the API (eg. refunds)?
 
-- How do you use webhook listeners locally? (hint: ngrok)
+- How do we use webhook listeners locally? (hint: ngrok)
 
-- How do you test webhook listeners in your CI pipeline?
+- How do we test webhook listeners in your CI pipeline?
 
-### Deployment concerns
+### Deployment
 
 The first data import for a mid-sized store may take several hours to complete,
 while other resources like [`OrderTransaction`](https://shopify.dev/docs/api/admin-rest/2023-07/resources/transaction)
 may take days to load.
 
-- How do you deploy the "first import" service?
+- How do we deploy the "first import" service?
 
-- How do you recover from ephemeral errors during a long-running import?
+- How do we recover from ephemeral errors during a long-running import?
 
 - What happens when a new order arrives during an import? Will it get imported too?
 
 **Shopify webhooks** are the only method for keeping your data fresh in real-time. But if a webhook
 fails to deliver (eg. because your server is overwhlemed), you end up losing data.
 
-- How do you deploy and scale webhook listeners for maximum availability?
+- How do we deploy and scale webhook listeners for maximum availability?
 
-- How do you avoid data loss during downtime? How do you recover from bugs in the listener?
+- How do we avoid data loss during downtime? How do we recover from bugs in the listener?
 
 Listeners must respond with a 200 status within 5 seconds, otherwise the delivery is considered failed.
 
-- How do guarantee response within the 5 second timeout?
+- How do we guarantee response within the 5 second timeout?
 
 When a webhook delivery fails, Shopify retries it up to
 [19 times in 48 hours](https://shopify.dev/docs/apps/webhooks/configuration/https#retry-frequency).
 This is meant to help avoid data loss, but can easily cause a dangerous _feedback loop_
 of webhook delivery, causing a DoS-like outage that is hard to recover from.
 
-- How do you avoid a DoS outage?
+- How do we avoid a DoS outage?
 
-- How do you isolate the rest of your infrastructure from issues with your Shopify integration?
+- How do we isolate the rest of our infrastructure from issues with the Shopify logic?
 
 On the other hand, Shopify delivers webhooks "at-least-once" requests are often duplicated.
 This can cause?
 
-- How do you implement idempotency at scale, to prevent updating? (hint: You will have to save the IDs of each webhook you've processed.)
+- How do we implement idempotency at scale, to prevent updating? (hint: You may have to save the IDs of each webhook that has been processed.)
 
 Shopify removes webhooks when delivery fails several times.
 
-- How do you check that a webhook hasn't been removed? When do you apply that logic?
+- How do we check that a webhook hasn't been removed? When do we apply that logic?
 
 > [!WARNING]
-> **Tip:** The truth is webhooks not enough. You will need to continue polling the API for the latest data from each of your customers' stores.
+> **Tip:** The truth is webhooks not enough. We will need to continue polling the API for the latest data from each of we customers' stores.
 > This is perhaps the hardest aspect of building a reliable ETL.
 
 ### Maintenance
 
-- If requirements change, how do you load an extra endpoint from Shopify (eg. transactions)?
+- If requirements change, how do we load an extra endpoint from Shopify (eg. transactions)?
 
   - How long for an engineer to extend and test the code?
-  - How do you backfill this new data for existing customers?
+  - How do we backfill this new data for existing customers?
 
-- What happens if a customer uninstalls your app?
+- What happens if a customer uninstalls the app?
 
-  - How do you delete all their data?
-  - What if they uninstall and install again? How do you prevent bugs?
+  - How do we delete all their data?
+  - What if they uninstall and install again? How do we prevent bugs?
 
-- How do you [rotate access tokens](https://shopify.dev/docs/apps/auth/oauth/rotate-revoke-client-credentials) frequently to keep your customers businesses secure?
+- How do we [rotate access tokens](https://shopify.dev/docs/apps/auth/oauth/rotate-revoke-client-credentials) frequently to keep we customers businesses secure?
 
 <br />
 
