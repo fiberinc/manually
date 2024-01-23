@@ -1,6 +1,6 @@
 # Manual Shopify Integration
 
-Sample code for pulling `Orders`, `Products` and `Customer` rows from
+This folder contains sample code for pulling `Orders`, `Products` and `Customer` rows from
 third-party Shopify stores.
 
 > [!TIP]
@@ -113,8 +113,7 @@ a DoS-like outage that is hard to recover from.
   - How do we **isolate** the rest of our infrastructure from issues with the
     Shopify logic?
 
-- On the other hand, Shopify delivers webhooks "at-least-once" requests are
-often duplicated. This can cause?
+- On the other hand, Shopify delivers webhooks "at-least-once", so requests are often duplicated. This is a common source of bugs in webhooks handlers.
 
   - How do we implement idempotency at scale, to prevent updating? (hint: You
     may have to save the IDs of each webhook that has been processed.)
@@ -130,11 +129,9 @@ often duplicated. This can cause?
 > part about building a reliable integration pipeline: figuring out how to
 > paginate each endpoint to generate a lossless Change Data Capture stream.
 
-<img
-src="https://media2.giphy.com/media/6AaB96ZVrUN0I/200.gif?cid=5a38a5a2cvtd186ebfqw6h0fwqzxdspmxjw63cc2tp6cqyb2&ep=v1_gifs_search&rid=200.gif&ct=g"
-width="300"/>
-
 ### Maintenance
+
+Work on third-party integrations is never truly over because APIs change and product requirements also change.
 
 - If requirements change, how do we load an extra endpoint from Shopify (eg.
   transactions)?
@@ -143,23 +140,31 @@ width="300"/>
 
   - How do we backfill this new data for existing customers?
 
+- If Shopify adds a new field to a resource type, how do we import it?
+
 - What happens if a customer uninstalls the app?
 
   - How do we delete all their data?
 
   - What if they uninstall and install again? How do we prevent bugs?
  
-- How do we comply with GPDR?
+- How do we comply with GDPR?
 
 - How do we [rotate access
   tokens](https://shopify.dev/docs/apps/auth/oauth/rotate-revoke-client-credentials)
-  frequently to keep we customers businesses safe?
+  frequently to keep our customers' businesses safe?
 
 - How do we treat customers' access tokens as securely as passwords?
 
 <br />
 
 ## Just use Fiber
+
+Feeling like this?
+
+<img
+src="https://media2.giphy.com/media/6AaB96ZVrUN0I/200.gif?cid=5a38a5a2cvtd186ebfqw6h0fwqzxdspmxjw63cc2tp6cqyb2&ep=v1_gifs_search&rid=200.gif&ct=g"
+width="300"/>
 
 Check us out at [Fiber](https://fiber.dev).
 
