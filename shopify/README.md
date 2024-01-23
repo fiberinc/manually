@@ -1,6 +1,6 @@
 # Manual Shopify Integration
 
-Code for pulling data from Shopify by interacting directly with their API.
+Code for pulling data from [Shopify](https://dev.shopify.com) by interacting directly with their API.
 Reads from `Order`, `Product` and `Customer` endpoints.
 
 > [!CAUTION]
@@ -30,10 +30,12 @@ Run poller and webhook listener to keep data fresh:
 
 `yarn run updater.ts --myShopifyDomain EXAMPLE.myshopify.com`
 
-# Why is a Shopify integration hard?
+## Deploy
+
+You will eventually have to package and deploy this code into your cloud.
 
 Reading 10,000 orders from a Shopify store will take you 5-10 minutes. For
 clients of any decent size, you will need not only long-running processes but a
 sophisticated system for saving state when things inevitably go wrong.
 
-Or... just use Fiber 🛜
+[Fiber](https://fiber.dev) handles all of this logic and more for you.
