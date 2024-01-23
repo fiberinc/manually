@@ -10,7 +10,7 @@
   </p>
 
   <p align="center">
-    Don't want to waste six months on this? <a href="https://fiber.dev?rel=github">Check out Fiber</a>.
+    Don't want to waste six months on this? <a href="https://fiber.dev?rel=github">Check out Fiber &rarr;</a>
   </p>
 
   <p align="center" style="align: center;">
@@ -19,7 +19,15 @@
   </p>
 </p>
 
-<br />
+
+## Directory
+
+- [Shopify](shopify)  \
+ Pull _orders_, _customers_ and _products_ from Shopify stores.
+- [Stripe](stripe) \
+ Pull _transactions_ and _charges_ from Stripe accounts. <em color="blue">coming soon</em>
+
+
 
 ## Use Fiber instead
 
