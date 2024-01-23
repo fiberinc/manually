@@ -1,9 +1,11 @@
-<img src="https://media2.giphy.com/media/6AaB96ZVrUN0I/200.gif?cid=5a38a5a2cvtd186ebfqw6h0fwqzxdspmxjw63cc2tp6cqyb2&ep=v1_gifs_search&rid=200.gif&ct=g" width="300"/>
-
 # Manual Shopify Integration
 
-Sample code for pulling `Orders`, `Products` and `Customer` rows from
-third-party [Shopify](https://dev.shopify.com) stores, by interacting directly with their API.
+Sample code for pulling `Orders`, `Products` and `Customer` rows from third-party [Shopify](https://dev.shopify.com) stores.
+
+This is only a toy project meant to demonstrate the complexity of building a reliable integration. Read [What's missing](#whats-missing) below.
+
+> [!NOTE]
+> Don't want to sacrifice six months of an engineer's soul on this? 🧙‍♂️ [Check out Fiber &rarr;](https://fiber.dev)
 
 ## Setup
 
@@ -33,7 +35,9 @@ Run poller and webhook listener to keep data fresh:
 
 `yarn run updater.ts --myShopifyDomain EXAMPLE.myshopify.com`
 
-## What's missing?
+<br />
+
+# What's missing?
 
 In a real project, you will have to deal with the following questions before pushing this code to production.
 
@@ -120,7 +124,8 @@ Shopify removes webhooks when delivery fails several times.
 
 - How do we [rotate access tokens](https://shopify.dev/docs/apps/auth/oauth/rotate-revoke-client-credentials) frequently to keep we customers businesses secure?
 
-<br />
+<img src="https://media2.giphy.com/media/6AaB96ZVrUN0I/200.gif?cid=5a38a5a2cvtd186ebfqw6h0fwqzxdspmxjw63cc2tp6cqyb2&ep=v1_gifs_search&rid=200.gif&ct=g" width="300"/>
+
 
 ## Just use Fiber
 
