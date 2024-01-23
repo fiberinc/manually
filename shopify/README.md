@@ -1,4 +1,4 @@
-# Building a Shopify integration _manually_ 🥶
+# Build a Shopify integration _manually_ 🥶
 
 Code for pulling data from [Shopify](https://dev.shopify.com) by interacting directly with their API.
 
@@ -108,17 +108,18 @@ Shopify removes webhooks when delivery fails several times.
 
 - How do you check that a webhook hasn't been removed? When do you apply that logic?
 
-> [!WARNING]
-> **Tip:** The truth is webhooks not enough. You will need to continue polling the API for the latest data from each of your customers' stores.
+> [!WARNING] > **Tip:** The truth is webhooks not enough. You will need to continue polling the API for the latest data from each of your customers' stores.
 > This is perhaps the hardest aspect of building a reliable ETL.
 
 ### Maintenance
 
 - If requirements change, how do you load an extra endpoint from Shopify (eg. transactions)?
+
   - How long for an engineer to extend and test the code?
   - How do you backfill this new data for existing customers?
 
 - What happens if a customer uninstalls your app?
+
   - How do you delete all their data?
   - What if they uninstall and install again? How do you prevent bugs?
 

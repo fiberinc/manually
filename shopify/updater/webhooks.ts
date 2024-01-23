@@ -1,11 +1,11 @@
+// README this is a work in progress.
+
 import { createAdminRestApiClient } from '@shopify/admin-api-client';
-import dotenv from 'dotenv';
+import chalk from 'chalk';
 import express, { Response } from 'express';
 import { prisma } from '../db/prisma';
 import { ShopifyCredential } from '../types';
 import { SHOPIFY_API_VERSION } from '../utils';
-import { ShopifyAccount } from '@prisma/client';
-import chalk from 'chalk';
 
 const PORT = '4040';
 

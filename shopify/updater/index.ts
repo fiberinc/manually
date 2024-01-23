@@ -1,4 +1,3 @@
-import { startPollingShopifyShops } from './polling';
 import {
 	registerWebhooksForAccounts,
 	startShopifyWebhookListener,
@@ -11,11 +10,13 @@ async function main() {
 	console.log('Registering webhooks for all Shopify accounts.');
 	await registerWebhooksForAccounts(WEBHOOK_HOST);
 
-	console.log('Will start webhook listener & polling jobs.');
+	console.log('Will start webhook listener.');
 	await Promise.all([
 		startShopifyWebhookListener(WEBHOOK_PORT),
-		// Look for new data every 10 seconds.
-		startPollingShopifyShops(10_000),
+		// TODO In reality, you will need to implement this as a precaution against
+		// missed webhooks. See the README.md to read about complexities of polling.
+		//
+		// startPollingShopifyShops(10_000),
 	]);
 }
 
