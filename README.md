@@ -24,12 +24,11 @@
 - [Shopify](shopify) \
   Pull _orders_, _customers_ and _products_ from Shopify stores.
 - [Stripe](stripe) \
-  Pull _transactions_ and _charges_ from Stripe accounts. <em color="blue">coming soon</em>
+  Pull _transactions_ and _charges_ from Stripe accounts. <em color="blue">(coming soon)</em>
 
 ## Use Fiber instead
 
-Fiber lets you skip all the code. Make a request to our API to start syncing
-data from an API immediately.
+Fiber gives you a complete solution from day zero. Replace all this code with a simple call to our API:
 
 ```http
 POST https://api.fiber.dev/sources/:source_name/accounts
@@ -41,6 +40,8 @@ Authorization: Basic base64(CLIENT_ID:CLIENT_SECRET)
 }
 ```
 
+Learn more at [wiki.fiber.dev](https://wiki.fiber.dev).
+
 ## License
 
-MIT License
+MIT

@@ -4,10 +4,11 @@ This folder contains sample code for pulling `Orders`, `Products` and `Customer`
 third-party Shopify stores.
 
 > [!TIP]
-> Want to skip six months of engineering sweat & tears?
+>
+> Want to skip six months of sweat & tears?
 > [Check out Fiber &rarr;](https://fiber.dev)
 
-[Keep reading to see what's missing &darr;](#whats-missing)
+[Scroll down to see what this project is missing &darr;](#whats-missing)
 
 <br />
 
@@ -78,9 +79,9 @@ pushing this code to production.
 ### Deployment
 
 - The first data import for a mid-sized store may take several hours to
-complete, while other resources like
-[`OrderTransaction`](https://shopify.dev/docs/api/admin-rest/2023-07/resources/transaction)
-may take days to load. **How do we deploy the "first import" service?**
+  complete, while other resources like
+  [`OrderTransaction`](https://shopify.dev/docs/api/admin-rest/2023-07/resources/transaction)
+  may take days to load. **How do we deploy the "first import" service?**
 
   - How do we recover from ephemeral errors during a long-running import?
 
@@ -88,8 +89,8 @@ may take days to load. **How do we deploy the "first import" service?**
     too?
 
 - **Shopify webhooks** are the only method for keeping your data fresh in
-real-time. But if a webhook fails to deliver (eg. because your server is
-overwhlemed), you end up losing data.
+  real-time. But if a webhook fails to deliver (eg. because your server is
+  overwhlemed), you end up losing data.
 
   - How do we deploy and scale webhook listeners for maximum availability?
 
@@ -103,10 +104,10 @@ overwhlemed), you end up losing data.
     PubSub)
 
 - When a webhook delivery fails, Shopify retries it up to [19 times in 48
-hours](https://shopify.dev/docs/apps/webhooks/configuration/https#retry-frequency).
-This is meant to help avoid data loss, but can easily cause a dangerous feedback
-loop of webhook delivery, with the number of requests growing over time. This is
-a DoS-like outage that is hard to recover from.
+  hours](https://shopify.dev/docs/apps/webhooks/configuration/https#retry-frequency).
+  This is meant to help avoid data loss, but can easily cause a dangerous feedback
+  loop of webhook delivery, with the number of requests growing over time. This is
+  a DoS-like outage that is hard to recover from.
 
   - How do we avoid a DoS outage?
 
@@ -115,8 +116,7 @@ a DoS-like outage that is hard to recover from.
 
 - On the other hand, Shopify delivers webhooks "at-least-once", so requests are often duplicated. This is a common source of bugs in webhooks handlers.
 
-  - How do we implement idempotency at scale, to prevent updating? (hint: You
-    may have to save the IDs of each webhook that has been processed.)
+  - How do we implement idempotency at scale, to prevent updating? (hint: You may have to create a table of ShopifyWebhooks to store each webhook that has been received.)
 
 - Shopify removes webhooks when delivery fails several times.
 
@@ -124,17 +124,19 @@ a DoS-like outage that is hard to recover from.
     logic?
 
 > [!WARNING]
-> Webhooks are just not enough. You will eventually need to continuously
-> poll the API to read the latest data from each customer. This is the hardest
-> part about building a reliable integration pipeline: figuring out how to
-> paginate each endpoint to generate a lossless Change Data Capture stream.
+>
+> **Webhooks are not enough.** You will soon need to continuously poll the API
+> to read the latest data from each customer. This is the hardest part about
+> building a reliable integration pipeline: figuring out how to paginate each
+> endpoint to generate a lossless Change Data Capture stream.
 
 ### Maintenance
 
 Work on third-party integrations is never truly over because APIs change and product requirements also change.
 
-- If requirements change, how do we load an extra endpoint from Shopify (eg.
-  transactions)?
+- How do we handle errors from [access tokens suddenly missing a required scope](https://shopify.dev/docs/apps/store/data-protection/protected-customer-data)?
+
+- When data requirements change, how do we load an extra endpoint from Shopify?
 
   - How long for an engineer to extend and test the code?
 
@@ -144,11 +146,13 @@ Work on third-party integrations is never truly over because APIs change and pro
 
 - What happens if a customer uninstalls the app?
 
+  - How do we prevent bugs from trying to load their data?
+
   - How do we delete all their data?
 
   - What if they uninstall and install again? How do we prevent bugs?
- 
-- How do we comply with GDPR?
+
+### Compliance
 
 - How do we [rotate access
   tokens](https://shopify.dev/docs/apps/auth/oauth/rotate-revoke-client-credentials)
@@ -156,17 +160,21 @@ Work on third-party integrations is never truly over because APIs change and pro
 
 - How do we treat customers' access tokens as securely as passwords?
 
+- How do we comply with GDPR?
+
 <br />
 
-## Just use Fiber
+# The solution
 
-Feeling like this?
+Feeling a bit like this?
 
 <img
 src="https://media2.giphy.com/media/6AaB96ZVrUN0I/200.gif?cid=5a38a5a2cvtd186ebfqw6h0fwqzxdspmxjw63cc2tp6cqyb2&ep=v1_gifs_search&rid=200.gif&ct=g"
 width="300"/>
 
-Check us out at [Fiber](https://fiber.dev).
+**Fiber** handles the real-time sync of data from thousands of Shopify stores into your database.
+
+[Check us out at fiber.dev &rarr;](https://fiber.dev)
 
 <img
 src="https://media0.giphy.com/media/3osxYamKD88c6pXdfO/giphy.gif?cid=5a38a5a2imendkpac5mx275yetn0fllilo25hvdkld20x0dp&ep=v1_gifs_search&rid=giphy.gif&ct=g"
