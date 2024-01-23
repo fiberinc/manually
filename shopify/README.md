@@ -1,4 +1,6 @@
-# Build a Shopify integration _manually_ 🥶
+<img src="https://media2.giphy.com/media/6AaB96ZVrUN0I/200.gif?cid=5a38a5a2cvtd186ebfqw6h0fwqzxdspmxjw63cc2tp6cqyb2&ep=v1_gifs_search&rid=200.gif&ct=g" width="300"/>
+
+# Manual Shopify Integration
 
 Code for pulling data from [Shopify](https://dev.shopify.com) by interacting directly with their API.
 
@@ -108,7 +110,8 @@ Shopify removes webhooks when delivery fails several times.
 
 - How do you check that a webhook hasn't been removed? When do you apply that logic?
 
-> [!WARNING] > **Tip:** The truth is webhooks not enough. You will need to continue polling the API for the latest data from each of your customers' stores.
+> [!WARNING]
+> **Tip:** The truth is webhooks not enough. You will need to continue polling the API for the latest data from each of your customers' stores.
 > This is perhaps the hardest aspect of building a reliable ETL.
 
 ### Maintenance
@@ -130,3 +133,5 @@ Shopify removes webhooks when delivery fails several times.
 ## Just use Fiber
 
 Check us out at [Fiber](https://fiber.dev).
+
+<img src="https://media0.giphy.com/media/3osxYamKD88c6pXdfO/giphy.gif?cid=5a38a5a2imendkpac5mx275yetn0fllilo25hvdkld20x0dp&ep=v1_gifs_search&rid=giphy.gif&ct=g" width="300" />
