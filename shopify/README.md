@@ -1,4 +1,4 @@
-# Manual Shopify Integration
+# Dummy Shopify ETL
 
 Code for pulling data from [Shopify](https://dev.shopify.com) by interacting directly with their API.
 
@@ -19,7 +19,7 @@ Migrate your database with Prisma:
 
 `yarn prisma migrate dev`
 
-Test:
+Run unit tests:
 
 `yarn test`
 
@@ -39,7 +39,78 @@ Run poller and webhook listener to keep data fresh:
 
 <br />
 
-# What's missing
+# What's missing?
+
+In a real-life scenario, you will have to deal with all the following questions
+before pushing this code to production.
+
+### Local development
+
+How do you
+
+
+
+To run tests that talk to the Shopify API, you will need Shopify shops for testing...
+
+- How do you receive webhooks for local development? (hint: ngrok)
+
+- How do you populate test shops
+
+To run tests that talk to the Shopify API, you will need Shopify shops for testing...
+
+- How do you populate shops for reliable testing?
+
+- How will engineers obtain tokens for test shops? (hint: They may have to host the Shopify OAuth redirection _locally_ using ngrok or alternatives.)
+
+- Will engineers share the same shops for testing?
+
+  - If so, how do you avoid transient errors like 429s? What if those break CI/CD?
+
+  - If not, how do you guide engineers to create new shops and obtain new access tokens?
+
+- How do keep test shops filled with data over time?
+
+
+### Testing
+
+- How do you unit test this code?
+
+To run tests that talk to the Shopify API, you will need Shopify shops for testing...
+
+- How do you populate shops for reliable testing?
+
+
+### Deployment
+
+- The first import functionality may easily take several hours.
+
+- How do you deploy the "first import" func? What if it takes several hours to complete?
+
+### Webhooks
+
+- How do you implement idempotency, so that you don't try?
+
+### Recovery
+
+-
+- How do you ensure availability? ([Shopify removes webhooks when](https://help.shopify.com/en/manual/orders/notifications/webhooks))
+
+### Maintenance
+
+- What
+
+- What happens when OAuth tokens expire?
+  - How do you
+  - How do you 
+
+
+
+- If requirements change, how do you load an extra endpoint from Shopify (eg. transactions)?
+  - How long for an engineer to extend and test the code?
+  - How do you backfill for all customers?
+- What if the new resource doesn't share (eg. 
+
+- How do you 
 
 - How to test this locally?
   - How to receive webhooks for local development? (hint: ngrok)
@@ -48,12 +119,9 @@ Run poller and webhook listener to keep data fresh:
   - How to host long-running code?
   - What happens if the Shopify API misbehaves?
   - How do you retry without duplicating effort?
-- If requirements change, how do you load an extra resource from Shopify (eg. transactions)?
 
-  - How long for an engineer to extend and test the code?
-  - How do you backfill for all customers?
 
-- How do you deploy that may take hours to complete?
+
 - How to scale webhook listeners?
   - How to recover from ?
 
