@@ -20,9 +20,3 @@ export interface ShopifyCredential {
 	myShopifyDomain: string;
 	scopes?: string[];
 }
-
-export interface BackfilledData {
-	orders: Order[];
-	products: Product[];
-	customers: Customer[];
-}

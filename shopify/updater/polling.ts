@@ -24,10 +24,7 @@ export async function getLatestOrdersFromAccount(account: ShopifyAccount) {
 	const json = await res.json();
 }
 
-export async function startPollingShopifyShop(
-	account: ShopifyAccount,
-	sleepMs: number
-) {
+export async function startPollingShopifyShops(sleepMs: number) {
 	for (;;) {
 		console.log(`Will sleep ${(sleepMs / 1000).toFixed()}s`);
 		await sleep(sleepMs);

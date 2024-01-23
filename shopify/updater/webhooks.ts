@@ -1,18 +1,28 @@
 import { createAdminRestApiClient } from '@shopify/admin-api-client';
 import dotenv from 'dotenv';
 import express, { Response } from 'express';
-import { prisma } from '../prisma';
+import { prisma } from '../db/prisma';
 import { ShopifyCredential } from '../types';
+import { SHOPIFY_API_VERSION } from '../utils';
+import { ShopifyAccount } from '@prisma/client';
+import chalk from 'chalk';
 
 const PORT = '4040';
 
-dotenv.config({
-	path: __dirname + '/../.env',
-});
+export async function registerWebhooksForAccounts(webhookHost: string) {
+	const accounts = await prisma.shopifyAccount.findMany({
+		where: {},
+	});
 
-const THIS_ENDPOINT = 'http://felipe-link.ngrok.app';
-
-export const SHOPIFY_API_VERSION = '2023-04';
+	for (const account of accounts) {
+		if (account.hasRegisteredWebhooks) {
+			console.log(
+				chalk.dim`Webhooks already registered for ${account.myShopifyDomain}`
+			);
+		}
+		await registerWebhooksForAccount(account);
+	}
+}
 
 async function registerWebhook(
 	acct: ShopifyCredential,
@@ -49,7 +59,7 @@ export async function registerWebhooksForAccount(acct: ShopifyCredential) {
 	await registerWebhook(acct, 'product/delete', '/webhooks/products/delete');
 }
 
-export async function listenForChanges() {
+export async function startShopifyWebhookListener(webhookHost: string) {
 	const app = express();
 
 	async function orderUpdateHandler(req: Express.Request, res: Response) {

@@ -7,8 +7,14 @@ import chalk from 'chalk';
 import parseLinkHeader from 'parse-link-header';
 import { prisma } from '../db/prisma';
 import { ShopifyOrderStruct } from '../schemas';
-import { BackfilledData, Customer, Order, Product } from '../types';
+import { Customer, Order, Product } from '../types';
 import { SHOPIFY_API_VERSION, fmtSince, getArgvOrThrow } from '../utils';
+
+export interface HistoricalData {
+	orders: Order[];
+	products: Product[];
+	customers: Customer[];
+}
 
 export async function getAllAtShopifyPath<T extends { id: string }>(
 	client: AdminRestApiClient,
@@ -89,7 +95,7 @@ export async function getAllAtShopifyPath<T extends { id: string }>(
 	return result;
 }
 
-export async function backfillAccountOrders(
+export async function loadHistoricalOrders(
 	acct: ShopifyAccount
 ): Promise<Order[]> {
 	const client = createAdminRestApiClient({
@@ -114,7 +120,7 @@ export async function backfillAccountOrders(
 	return result;
 }
 
-export async function backfillAccountProducts(
+export async function loadHistoricalProducts(
 	acct: ShopifyAccount
 ): Promise<Product[]> {
 	const client = createAdminRestApiClient({
@@ -135,11 +141,9 @@ export async function backfillAccountProducts(
 	return (json as any).products;
 }
 
-export async function backfillAccountCustomers(
+export async function loadHistoricalCustomers(
 	acct: ShopifyAccount
 ): Promise<Customer[]> {
-	return [];
-
 	const client = createAdminRestApiClient({
 		storeDomain: acct.myShopifyDomain,
 		apiVersion: SHOPIFY_API_VERSION,
@@ -157,12 +161,12 @@ export async function backfillAccountCustomers(
 	return (json as any).customers;
 }
 
-export async function backfillAccount(
+export async function loadAccountHistoricalData(
 	account: ShopifyAccount
-): Promise<BackfilledData> {
+): Promise<HistoricalData> {
 	const startTs = Date.now();
-	console.log(chalk.bold.greenBright('Backfill Orders'));
-	const orders = await backfillAccountOrders(account);
+	console.log(chalk.bold.greenBright('Loading Orders'));
+	const orders = await loadHistoricalOrders(account);
 
 	for (const row of orders) {
 		await prisma.shopifyOrder.create({
@@ -173,10 +177,10 @@ export async function backfillAccount(
 		});
 	}
 
-	console.log(chalk.dim(`Backfill orders done (${fmtSince(startTs)})\n`));
+	console.log(chalk.dim(`Loading orders done (${fmtSince(startTs)})\n`));
 
-	console.log(chalk.bold.greenBright('Backfill Customers'));
-	const customers = await backfillAccountCustomers(account);
+	console.log(chalk.bold.greenBright('Loading Customers'));
+	const customers = await loadHistoricalCustomers(account);
 
 	for (const row of customers) {
 		await prisma.shopifyCustomer.create({
@@ -187,10 +191,10 @@ export async function backfillAccount(
 		});
 	}
 
-	console.log(chalk.dim(`Backfill customers done (${fmtSince(startTs)})\n`));
+	console.log(chalk.dim(`Loading customers done (${fmtSince(startTs)})\n`));
 
-	console.log(chalk.bold.greenBright('Backfill Products'));
-	const products = await backfillAccountProducts(account);
+	console.log(chalk.bold.greenBright('Loading Products'));
+	const products = await loadHistoricalProducts(account);
 
 	for (const row of products) {
 		await prisma.shopifyProduct.create({
@@ -200,9 +204,9 @@ export async function backfillAccount(
 			},
 		});
 	}
-	console.log(chalk.dim(`Backfill products done (${fmtSince(startTs)})\n`));
+	console.log(chalk.dim(`Loading products done (${fmtSince(startTs)})\n`));
 
-	const result: BackfilledData = {
+	const result: HistoricalData = {
 		orders,
 		customers,
 		products,
@@ -234,12 +238,12 @@ async function main() {
 
 	const start = Date.now();
 	console.log(
-		chalk.blueBright.bold('Account backfill...'),
+		chalk.blueBright.bold('Load starting...'),
 		chalk.dim(account.myShopifyDomain)
 	);
-	await backfillAccount(account);
+	await loadAccountHistoricalData(account);
 	console.log(
-		chalk.dim.bold(`Account backfill done in ${fmtSince(start)}`),
+		chalk.dim.bold(`Account data loaded in ${fmtSince(start)}`),
 		'Will update database.'
 	);
 
