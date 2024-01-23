@@ -4,24 +4,36 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("postgresql://postgres:postgres@localhost:5432/manually-shopify")
+  url      = env("DATABASE_URL")
 }
 
-model Account {
+model ShopifyAccount {
   id              String   @id @default(cuid())
   createdAt       DateTime @default(now())
   shopId          String
-  myShopifyDomain String
-  accessToken     String?  @db.Text
-  userEmail       String
+  myShopifyDomain String   @unique
+  accessToken     String
+
+  // This could be on a per resource basis.
+  backfillEndedAt       DateTime?
+  hasRegisteredWebhooks Boolean   @default(false)
+
+  ShopifyOrder          ShopifyOrder[]
+  ShopifyProduct        ShopifyProduct[]
+  ShopifyCustomer       ShopifyCustomer[]
+  ShopifyProductVariant ShopifyProductVariant[]
 }
 
 //
 
 model ShopifyOrder {
-  id                          String    @id
-  created_at                  DateTime
-  updated_at                  DateTime?
+  id         String    @id
+  created_at DateTime
+  updated_at DateTime?
+
+  accountId      String
+  shopifyAccount ShopifyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
   name                        String?
   note                        String?
   tags                        String?
@@ -110,9 +122,13 @@ model ShopifyOrder {
 }
 
 model ShopifyProduct {
-  id                   String    @id
-  created_at           DateTime
-  updated_at           DateTime?
+  id         String    @id
+  created_at DateTime
+  updated_at DateTime?
+
+  accountId      String
+  shopifyAccount ShopifyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
   tags                 String?
   image                Json?
   title                String?
@@ -136,9 +152,13 @@ model ShopifyProduct {
 }
 
 model ShopifyCustomer {
-  id                           String    @id
-  created_at                   DateTime
-  updated_at                   DateTime?
+  id         String    @id
+  created_at DateTime
+  updated_at DateTime?
+
+  accountId      String
+  shopifyAccount ShopifyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
   note                         String?
   tags                         String?
   email                        String?
@@ -167,9 +187,13 @@ model ShopifyCustomer {
 }
 
 model ShopifyProductVariant {
-  id                     String    @id
-  created_at             DateTime
-  updated_at             DateTime?
+  id         String    @id
+  created_at DateTime
+  updated_at DateTime?
+
+  accountId      String
+  shopifyAccount ShopifyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
   sku                    String?
   grams                  Int?
   price                  Float?

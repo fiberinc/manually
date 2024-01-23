@@ -1,5 +1,33 @@
 import { z } from 'zod';
 
+export const ShopifyShopStruct = z.object({
+	id: z.number().int(),
+	name: z.string().nullable(),
+	email: z.string().nullable(),
+	domain: z.string().nullable(),
+	province: z.string().nullable(),
+	country: z.string().nullable(),
+	address1: z.string().nullable(),
+	zip: z.string().nullable(),
+	city: z.string().nullable(),
+	phone: z.string().nullable(),
+	primary_locale: z.string().nullable(),
+	address2: z.string().nullable(),
+	created_at: z.string().nullable(),
+	updated_at: z.string().nullable(),
+	country_code: z.string().nullable(),
+	country_name: z.string().nullable(),
+	currency: z.string().nullable(),
+	customer_email: z.string().nullable(),
+	timezone: z.string().nullable(),
+	iana_timezone: z.string().nullable(),
+	shop_owner: z.string().nullable(),
+	money_format: z.string().nullable(),
+	money_with_currency_format: z.string().nullable(),
+	weight_unit: z.string().nullable(),
+	province_code: z.string().nullable(),
+});
+
 export const ShopifyOrderStruct = z.object({
 	id: z.string(),
 	created_at: z.string(),

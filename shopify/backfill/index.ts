@@ -1,19 +1,14 @@
+import { ShopifyAccount } from '@prisma/client';
 import {
 	AdminRestApiClient,
 	createAdminRestApiClient,
 } from '@shopify/admin-api-client';
 import chalk from 'chalk';
 import parseLinkHeader from 'parse-link-header';
-import { SHOPIFY_API_VERSION } from '..';
-import {
-	BackfilledData,
-	Customer,
-	Order,
-	Product,
-	ShopifyCredential,
-} from '../types';
-import { fmtSince } from '../utils';
+import { prisma } from '../db/prisma';
 import { ShopifyOrderStruct } from '../schemas';
+import { BackfilledData, Customer, Order, Product } from '../types';
+import { SHOPIFY_API_VERSION, fmtSince, getArgvOrThrow } from '../utils';
 
 export async function getAllAtShopifyPath<T extends { id: string }>(
 	client: AdminRestApiClient,
@@ -36,7 +31,7 @@ export async function getAllAtShopifyPath<T extends { id: string }>(
 		result = result.concat(newRows);
 	}
 
-	let pageInfo = null;
+	let pageInfo: string | null = null;
 	for (let i = 0; ; i++) {
 		let searchParams;
 		if (pageInfo) {
@@ -54,7 +49,7 @@ export async function getAllAtShopifyPath<T extends { id: string }>(
 
 		console.log(
 			`Loading ${path} ${i}... ${pageInfo}`,
-			chalk.dim('elapsed:') + fmtSince(start)
+			chalk.dim('elapsed: ') + fmtSince(start)
 		);
 		const res = await client.get(path, {
 			searchParams,
@@ -65,7 +60,7 @@ export async function getAllAtShopifyPath<T extends { id: string }>(
 			throw Error('Call failed');
 		}
 
-		const json = await res.json();
+		const json: any = await res.json();
 		const rows = json[bodyKey] as T[];
 
 		console.log(`Loaded ${rows.length} rows (prev: ${result.length})`);
@@ -86,7 +81,7 @@ export async function getAllAtShopifyPath<T extends { id: string }>(
 		}
 
 		// console.log('parsed', parsed);
-		pageInfo = parsed!.next!.page_info;
+		pageInfo = parsed!.next!.page_info as string;
 	}
 
 	console.log(chalk.dim(`Returning ${result.length} items.`));
@@ -95,7 +90,7 @@ export async function getAllAtShopifyPath<T extends { id: string }>(
 }
 
 export async function backfillAccountOrders(
-	acct: ShopifyCredential
+	acct: ShopifyAccount
 ): Promise<Order[]> {
 	const client = createAdminRestApiClient({
 		storeDomain: acct.myShopifyDomain,
@@ -111,18 +106,17 @@ export async function backfillAccountOrders(
 	});
 
 	// Validate the schemas.
-	for (const row in all) {
-		ShopifyOrderStruct.parse(row);
-	}
 
-	return all;
+	const result: Order[] = [];
+	for (const row in all) {
+		result.push(ShopifyOrderStruct.parse(row));
+	}
+	return result;
 }
 
 export async function backfillAccountProducts(
-	acct: ShopifyCredential
+	acct: ShopifyAccount
 ): Promise<Product[]> {
-	return [];
-
 	const client = createAdminRestApiClient({
 		storeDomain: acct.myShopifyDomain,
 		apiVersion: SHOPIFY_API_VERSION,
@@ -138,11 +132,11 @@ export async function backfillAccountProducts(
 
 	const json = await a.json();
 	// console.log('a', a.status, a.headers, json);
-	return json.products;
+	return (json as any).products;
 }
 
 export async function backfillAccountCustomers(
-	acct: ShopifyCredential
+	acct: ShopifyAccount
 ): Promise<Customer[]> {
 	return [];
 
@@ -160,23 +154,52 @@ export async function backfillAccountCustomers(
 	});
 	const json = await a.json();
 	// console.log('a', a.status, a.headers, json);
-	return json.customers;
+	return (json as any).customers;
 }
 
 export async function backfillAccount(
-	acct: ShopifyCredential
+	account: ShopifyAccount
 ): Promise<BackfilledData> {
 	const startTs = Date.now();
 	console.log(chalk.bold.greenBright('Backfill Orders'));
-	const orders = await backfillAccountOrders(acct);
+	const orders = await backfillAccountOrders(account);
+
+	for (const row of orders) {
+		await prisma.shopifyOrder.create({
+			data: {
+				...(row as any),
+				accountId: account.id,
+			},
+		});
+	}
+
 	console.log(chalk.dim(`Backfill orders done (${fmtSince(startTs)})\n`));
 
 	console.log(chalk.bold.greenBright('Backfill Customers'));
-	const customers = await backfillAccountCustomers(acct);
+	const customers = await backfillAccountCustomers(account);
+
+	for (const row of customers) {
+		await prisma.shopifyCustomer.create({
+			data: {
+				...(row as any),
+				accountId: account.id,
+			},
+		});
+	}
+
 	console.log(chalk.dim(`Backfill customers done (${fmtSince(startTs)})\n`));
 
 	console.log(chalk.bold.greenBright('Backfill Products'));
-	const products = await backfillAccountProducts(acct);
+	const products = await backfillAccountProducts(account);
+
+	for (const row of products) {
+		await prisma.shopifyProduct.create({
+			data: {
+				...(row as any),
+				accountId: account.id,
+			},
+		});
+	}
 	console.log(chalk.dim(`Backfill products done (${fmtSince(startTs)})\n`));
 
 	const result: BackfilledData = {
@@ -192,3 +215,52 @@ export async function backfillAccount(
 
 	return result;
 }
+
+async function main() {
+	const myShopifyDomain = getArgvOrThrow('myShopifyDomain');
+
+	const account = await prisma.shopifyAccount.findFirst({
+		where: {
+			myShopifyDomain,
+		},
+	});
+
+	if (!account) {
+		throw Error(`No account for shop with domain ${myShopifyDomain}`);
+	}
+
+	console.log('Account found', account);
+	console.log();
+
+	const start = Date.now();
+	console.log(
+		chalk.blueBright.bold('Account backfill...'),
+		chalk.dim(account.myShopifyDomain)
+	);
+	await backfillAccount(account);
+	console.log(
+		chalk.dim.bold(`Account backfill done in ${fmtSince(start)}`),
+		'Will update database.'
+	);
+
+	await prisma.shopifyAccount.update({
+		where: {
+			id: account.id,
+		},
+		data: {
+			backfillEndedAt: new Date(),
+		},
+	});
+
+	console.log('Next, keep data up-to-date by running:');
+	console.log(
+		chalk.green(`>`),
+		chalk.greenBright(
+			`npx ts-node updater --myShopifyDomain ${account.myShopifyDomain}`
+		)
+	);
+}
+
+main().catch((e) => {
+	console.warn('Script failed with error', e);
+});

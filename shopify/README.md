@@ -1,47 +1,39 @@
 # Manual Shopify Integration
 
-Code for manually pulling data from Shopify. Supports reading from `Order`, `Product` and
-`Customer` objects.
+Code for pulling data from Shopify by interacting directly with their API.
+Reads from `Order`, `Product` and `Customer` endpoints.
 
 > [!CAUTION]
-> This is a toy project not meant for actual use in production.
+> This is a toy project. The patterns here will not scale in production.
 
-## Getting started
+## Setup
 
 Install dependencies:
 
 `yarn`
 
-### Setup database to receive data
-
 Migrate your database with Prisma:
 
 `yarn prisma migrate dev`
 
-### Enter credentials for multiple Shopify accounts
+## How it works
 
-TODO
+Register a new Shopify account:
 
-### Add an account
+`bun run create-account.ts --myShopifyDomain EXAMPLE.myshopify.com --accessToken ACCESS_TOKEN`
 
-Add a credential to the `.env` file.
+Backfill that account with historical data:
 
-`yarn run index.ts`
+`bun run backfill.ts --myShopifyDomain EXAMPLE.myshopify.com`
 
-### Run server to receive real-time updates
+Run poller and webhook listener to keep data fresh:
 
-`yarn run updater.ts`
+`yarn run updater.ts --myShopifyDomain EXAMPLE.myshopify.com`
 
----
-
-# Or... just use Fiber 🛜
+# Why is a Shopify integration hard?
 
 Reading 10,000 orders from a Shopify store will take you 5-10 minutes. For
 clients of any decent size, you will need not only long-running processes but a
 sophisticated system for saving state when things inevitably go wrong.
 
-## To-dos
-
-- [x] Load first page from products, orders & customers
-- [x] Load all the pages
-- [x] Validate the schema of the objects we receive
+Or... just use Fiber 🛜
