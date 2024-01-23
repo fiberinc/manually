@@ -1,4 +1,4 @@
-# Dummy Shopify ETL
+# Building a Shopify integration _manually_ 🥶
 
 Code for pulling data from [Shopify](https://dev.shopify.com) by interacting directly with their API.
 
@@ -43,9 +43,9 @@ Run poller and webhook listener to keep data fresh:
 
 In a real project, you will have to deal with the following questions before pushing this code to production.
 
-## Testing concerns
+### Testing concerns
 
-How do you unit test this code?
+- How do you unit test this code?
 
 To run tests that talk to the Shopify API, you will need Shopify stores for testing...
 
@@ -53,93 +53,79 @@ To run tests that talk to the Shopify API, you will need Shopify stores for test
 
 - How do keep test stores filled with data over time?
 
-- How do you obtain tokens for test shops? (hint: You may have to host the Shopify OAuth redirection locally using ngrok.)
+- How do you obtain credentials for test shops? (hint: You may have to host the Shopify OAuth redirection locally using ngrok.)
 
-Will engineers share test stores?
+- Will engineers share test stores?
 
   - If yes, how do you avoid transient errors like 429s? What if those break CI?
 
-  - If no, how do you guide engineers to create new shops, Shopify apps, and then obtain access tokens?
+  - If no, how do you guide engineers to create new shops, Shopify apps, and then obtain credentials?
 
-How do you test resources only available to Shopify Plus customers or which can't be created via the API?
+- How do you test resources only available to Shopify Plus customers? Or resources that can't be created via the API (eg. refunds)?
 
-How do you use webhook listeners locally? (hint: ngrok)
+- How do you use webhook listeners locally? (hint: ngrok)
 
-## Deployment concerns
+- How do you test webhook listeners in your CI pipeline?
 
-The first data import for a mid-sized store may take several hours to complete, while certain resources like `OrderTransaction` may easily take days to load.
+### Deployment concerns
 
-- How do you deploy the "first import" service to be long-running?
+The first data import for a mid-sized store may take several hours to complete,
+while other resources like [`OrderTransaction`](https://shopify.dev/docs/api/admin-rest/2023-07/resources/transaction)
+may take days to load.
 
-> [!TIP]
-> It may take multiple days to import other resources like the most recent OrderTransactions for a store.
+- How do you deploy the "first import" service?
 
-- How do you recover from ephemeral errors during a long-running import service?
+- How do you recover from ephemeral errors during a long-running import?
 
-- What happens when new orders/customers/etc come in while you are doing the first import? How do you load those?
+- What happens when a new order arrives during an import? Will it get imported too?
 
-Webhooks are the only method for keeping your database up-to-date _in real-time_.
+**Shopify webhooks** are the only method for keeping your data fresh in real-time. But if a webhook
+fails to deliver (eg. because your server is overwhlemed), you end up losing data.
 
+- How do you deploy and scale webhook listeners for maximum availability?
 
-- How do you scale the webhook listeners?
+- How do you avoid data loss during downtime? How do you recover from bugs in the listener?
 
-- How do you avoid data loss when webhooks go down momentarily?
+Listeners must respond with a 200 status within 5 seconds, otherwise the delivery is considered failed.
 
-When delivery of a webhook fails, Shopify retries it up to [19 times in 48 hours](https://shopify.dev/docs/apps/webhooks/configuration/https#retry-frequency).
+- How do guarantee response within the 5 second timeout?
 
-- How do you avoid a spyraling DoS?
+When a webhook delivery fails, Shopify retries it up to
+[19 times in 48 hours](https://shopify.dev/docs/apps/webhooks/configuration/https#retry-frequency).
+This is meant to help avoid data loss, but can easily cause a dangerous _feedback loop_
+of webhook delivery, causing a DoS-like outage that is hard to recover from.
 
-Shopify webhooks have at-least-once" delivery, so you will frequently receive duplicate requests.
+- How do you avoid a DoS outage?
+
+- How do you isolate the rest of your infrastructure from issues with your Shopify integration?
+
+On the other hand, Shopify delivers webhooks "at-least-once" requests are often duplicated.
+This can cause?
 
 - How do you implement idempotency at scale, to prevent updating? (hint: You will have to save the IDs of each webhook you've processed.)
 
 Shopify removes webhooks when delivery fails several times.
 
-- How do you check that a webhook hasn't been remove? When do you apply that logic?
-
+- How do you check that a webhook hasn't been removed? When do you apply that logic?
 
 > [!WARNING]
 > **Tip:** The truth is webhooks not enough. You will need to continue polling the API for the latest data from each of your customers' stores.
 > This is perhaps the hardest aspect of building a reliable ETL.
 
-### Recovery
-
--
-- How do you ensure availability? ()
-
 ### Maintenance
-
-- What
-
-- What happens when OAuth tokens expire?
-  - How do you
-  - How do you 
-
-
 
 - If requirements change, how do you load an extra endpoint from Shopify (eg. transactions)?
   - How long for an engineer to extend and test the code?
-  - How do you backfill for all customers?
-- What if the new resource doesn't share (eg. 
+  - How do you backfill this new data for existing customers?
 
-- How do you 
+- What happens if a customer uninstalls your app?
+  - How do you delete all their data?
+  - What if they uninstall and install again? How do you prevent bugs?
 
+- How do you [rotate access tokens](https://shopify.dev/docs/apps/auth/oauth/rotate-revoke-client-credentials) frequently to keep your customers businesses secure?
 
-- What if the first import takes several hours to complete?
-  - What if new Shopify orders arrive for a store while importing? Will they show up?
+<br />
 
-  - What happens if the Shopify API misbehaves?
-  - How do you retry without duplicating effort?
+## Just use Fiber
 
-
-
-- How to scale webhook listeners?
-  - How to recover from ?
-
-You will eventually have to package and deploy this code into your cloud.
-
-Reading 10,000 orders from a Shopify store will take you 5-10 minutes. For
-clients of any decent size, you will need not only long-running processes but a
-sophisticated system for saving state when things inevitably go wrong.
-
-[Fiber](https://fiber.dev) handles all of this logic and more for you.
+Check us out at [Fiber](https://fiber.dev).
