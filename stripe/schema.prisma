@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("postgresql://postgres:postgres@localhost:5432/manually-stripe")
+}
+
+model Account {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  stripeAccountId String
+}
+
+model StripeTransaction {
+  id         String    @id
+  created_at DateTime
+  updated_at DateTime?
+  account_id String
+
+  @@index([id, account_id])
+  @@index([updated_at, account_id])
+}
