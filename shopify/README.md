@@ -33,9 +33,10 @@ Register a new Shopify account:
 `npx ts-node create-account.ts --myShopifyDomain EXAMPLE.myshopify.com --accessToken ACCESS_TOKEN`
 
 > [!NOTE]
+>
 > Need help getting the access token for a Shopify store? Check out
-> [Handshake](https://github.com/fiberinc/handshake): a Next.js boilerplate
-> app that handles OAuth with 200+ APIs, including Shopify.
+> [Handshake](https://github.com/fiberinc/handshake). It's a Next.js app that
+> helps you get access tokens to over 200 APIs, including Shopify.
 
 Load historical data from that account:
 
