@@ -252,7 +252,7 @@ async function main() {
 			id: account.id,
 		},
 		data: {
-			backfillEndedAt: new Date(),
+			firstImportEndedAt: new Date(),
 		},
 	});
 

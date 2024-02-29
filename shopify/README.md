@@ -30,8 +30,7 @@ Run unit tests:
 
 Register a new Shopify account:
 
-`npx ts-node create-account.ts --myShopifyDomain EXAMPLE.myshopify.com
---accessToken ACCESS_TOKEN`
+`npx ts-node create-account.ts --myShopifyDomain EXAMPLE.myshopify.com --accessToken ACCESS_TOKEN`
 
 Load historical data from that account:
 
@@ -103,7 +102,7 @@ pushing this code to production.
   - How do we guarantee response within the 5 second timeout? (Hint: Kafka,
     PubSub)
 
-- When a webhook delivery fails, Shopify retries it up to [19 times in 48
+- When a webhook delivery fails, Shopify retries it up to [19 times in 48
   hours](https://shopify.dev/docs/apps/webhooks/configuration/https#retry-frequency).
   This is meant to help avoid data loss, but can easily cause a dangerous feedback
   loop of webhook delivery, with the number of requests growing over time. This is
